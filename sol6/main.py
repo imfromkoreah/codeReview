@@ -9,6 +9,36 @@ import time
 '''
 
 # 더미클래스 (화성 기지의 환경 데이터 관리)
+# 이니셜라이즈 사용해서 수정함
+'''
+import random
+
+class DummySensor:
+    def set_env(self):
+        """환경 값을 랜덤으로 설정한다."""
+        self.env_values = {
+            'mars_base_internal_temperature': random.randint(18, 30),
+            'mars_base_external_temperature': random.randint(0, 21),
+            'mars_base_internal_humidity': random.randint(50, 60),
+            'mars_base_external_illuminance': random.randint(500, 715),
+            'mars_base_internal_co2': round(random.uniform(0.02, 0.1), 3),
+            'mars_base_internal_oxygen': round(random.uniform(4.0, 7.0), 2)
+        }
+
+    def get_env(self):
+        """환경 값을 반환한다."""
+        return self.env_values  # 문제가 발생할 가능성이 있음
+
+# 인스턴스 생성
+ds = DummySensor()
+
+# 환경 값을 가져오기 전에 get_env()를 호출하면 오류 발생
+# print(ds.get_env())  # AttributeError: 'DummySensor' object has no attribute 'env_values'
+
+ds.set_env()  # 환경 값 설정
+print(ds.get_env())  # 정상적으로 출력됨
+
+'''
 class DummySensor:
     def __init__(self):
         """DummySensor 클래스는 화성 기지 환경 값을 랜덤으로 생성"""
@@ -68,3 +98,5 @@ env_data = ds.get_env()  # 환경 값 가져오기
 
 for key, value in env_data.items():
     print(f"{key}: {value}") # 환경 값 줄바꿈 출력
+   
+env_data = ds.get_env()  # 환경 값 가져오기
