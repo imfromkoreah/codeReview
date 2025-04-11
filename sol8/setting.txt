@@ -1,0 +1,7 @@
+os=false
+os_version=false
+cpu_type=false
+cpu_cores=false
+memory=false
+cpu_usage=false
+memory_usage=true
