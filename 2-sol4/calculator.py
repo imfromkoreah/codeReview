@@ -4,23 +4,19 @@ from PyQt5.QtWidgets import (
     QGridLayout, QLineEdit
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 
-# ========================
-# 계산 로직을 담당하는 클래스
-# ========================
 class Calculator:
     def __init__(self):
         self.reset()
 
     def reset(self):
-        # 초기 상태로 설정
-        self.current_input = '0'  # 현재 입력된 값
-        self.last_result = None   # 마지막 연산 결과
-        self.last_operator = None # 마지막 연산자 (+, -, *, /)
-        self.new_input = True     # 새로운 입력 시작 여부
+        self.current_input = '0'
+        self.last_result = None
+        self.last_operator = None
+        self.new_input = True
 
     def input_number(self, num):
-        # 입력된 숫자 처리리
         if self.new_input:
             self.current_input = num
             self.new_input = False
@@ -31,40 +27,28 @@ class Calculator:
                 self.current_input += num
 
     def input_dot(self):
-        # 소수점 처리리
         if '.' not in self.current_input:
             self.current_input += '.'
             self.new_input = False
 
     def set_operator(self, operator):
-        # 연산자 설정 (+, -, *, /)
         if self.last_operator:
-            self.equal() # 이전 연산 수행 
+            self.equal()
         self.last_result = float(self.current_input)
         self.last_operator = operator
         self.new_input = True
 
-    def add(self):
-        self.set_operator('+')
-
-    def subtract(self):
-        self.set_operator('-')
-
-    def multiply(self):
-        self.set_operator('*')
-
-    def divide(self):
-        self.set_operator('/')
+    def add(self): self.set_operator('+')
+    def subtract(self): self.set_operator('-')
+    def multiply(self): self.set_operator('*')
+    def divide(self): self.set_operator('/')
 
     def equal(self):
-        # 등호(=) 눌렀을 때 연산 처리 로직
         if self.last_operator is None or self.last_result is None:
             return
-
         try:
             current = float(self.current_input)
             result = None
-
             if self.last_operator == '+':
                 result = self.last_result + current
             elif self.last_operator == '-':
@@ -73,23 +57,15 @@ class Calculator:
                 result = self.last_result * current
             elif self.last_operator == '/':
                 if current == 0:
-                    self.current_input = 'Error: Divide by 0'
+                    self.current_input = 'Error'
                     self.last_result = None
                     self.last_operator = None
                     return
                 result = self.last_result / current
-
             result = round(result, 6)
-
-            if abs(result) > 1e100:
-                self.current_input = 'Error: Overflow'
-            else:
-                self.current_input = str(result)
-
-        except Exception:
+            self.current_input = str(result)
+        except:
             self.current_input = 'Error'
-            
-        # 연산 후 초기화
         self.last_operator = None
         self.last_result = None
         self.new_input = True
@@ -106,34 +82,45 @@ class Calculator:
             value = float(self.current_input)
             value = value / 100
             self.current_input = str(round(value, 6))
-        except Exception:
+        except:
             self.current_input = 'Error'
         self.new_input = True
 
     def get_display(self):
         return self.current_input
 
-# ========================
-# UI를 구성하는 클래스
-# ========================
 class CalculatorApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('PyQt5 계산기')  # 창 제목
-        self.calculator = Calculator()      # 계산 로직 인스턴스
-        self.create_ui()                    # UI 구성 호출
+        self.setWindowTitle('iPhone 스타일 계산기')
+        self.setFixedSize(320, 550)  # 아이폰 비율에 더 가까운 크기
+        self.setStyleSheet("background-color: #000000;")
+        self.calculator = Calculator()
+        self.create_ui()
 
     def create_ui(self):
+        # 디스플레이 설정
         self.display = QLineEdit()
         self.display.setReadOnly(True)
-        self.display.setAlignment(Qt.AlignRight)
-        self.display.setFixedHeight(40)
+        self.display.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.display.setFixedHeight(100)  # 더 큰 디스플레이 영역
+        self.display.setStyleSheet("""
+            color: #FFFFFF; 
+            background-color: #000000; 
+            border: none; 
+            padding-right: 20px;
+            font-size: 48px;  /* 더 큰 폰트 크기 */
+        """)
+        self.display.setFont(QFont('Helvetica', 48, QFont.Bold))  # Helvetica로 아이폰 느낌
         self.display.setText(self.calculator.get_display())
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.display)
+        main_layout.addStretch(1)  # 디주변 여백
 
+        # 버튼 그리드
         grid = QGridLayout()
+        grid.setSpacing(10)  # 버튼 간 간격
         buttons = [
             ('C', 0, 0), ('±', 0, 1), ('%', 0, 2), ('÷', 0, 3),
             ('7', 1, 0), ('8', 1, 1), ('9', 1, 2), ('×', 1, 3),
@@ -144,19 +131,47 @@ class CalculatorApp(QWidget):
 
         for item in buttons:
             if len(item) == 3:
-                btn_text, row, col = item
-                rowspan = 1
-                colspan = 1
+                text, row, col = item
+                rowspan, colspan = 1, 1
             else:
-                btn_text, row, col, rowspan, colspan = item
+                text, row, col, rowspan, colspan = item
 
-            btn = QPushButton(btn_text)
-            btn.setFixedSize(60, 40)
-            grid.addWidget(btn, row, col, rowspan, colspan)
-            btn.clicked.connect(self.create_handler(btn_text))
+            btn = QPushButton(text)
+            btn.setFixedSize(70, 70)  # 정사각형 버튼
+            if text == '0':
+                btn.setFixedSize(150, 70)  # 0 버튼은 가로로 길게
+            btn.setFont(QFont('Helvetica', 24, QFont.Bold))
+            btn.setStyleSheet(self.get_button_style(text))
+            grid.addWidget(btn, row, col, rowspan, colspan, alignment=Qt.AlignCenter)
+            btn.clicked.connect(self.create_handler(text))
 
         main_layout.addLayout(grid)
+        main_layout.setContentsMargins(10, 10, 10, 20)  # 전체 레이아웃 여백
         self.setLayout(main_layout)
+
+    def get_button_style(self, text):
+        base_style = """
+            border-radius: 35px;  /* 완벽한 원형 버튼 */
+            border: none;
+        """
+        if text in ['C', '±', '%']:
+            return base_style + """
+                background-color: #A5A5A5; 
+                color: #000000;
+                font-size: 22px;
+            """
+        elif text in ['÷', '×', '-', '+', '=']:
+            return base_style + """
+                background-color: #F5A623;  /* 아이폰 주황색 */
+                color: #FFFFFF;
+                font-size: 28px;
+            """
+        else:
+            return base_style + """
+                background-color: #333333; 
+                color: #FFFFFF;
+                font-size: 24px;
+            """
 
     def create_handler(self, text):
         def handler():
@@ -180,15 +195,11 @@ class CalculatorApp(QWidget):
                 self.calculator.divide()
             elif text == '=':
                 self.calculator.equal()
-
             self.display.setText(self.calculator.get_display())
         return handler
 
-# ========================
-# 메인 함수 (앱 실행 부분)
-# ========================
 if __name__ == '__main__':
-    app = QApplication(sys.argv)  # PyQt 앱 실행 준비
-    window = CalculatorApp()      # 계산기 앱 생성
-    window.show()                 # 창 띄우기
-    sys.exit(app.exec_())         # 이벤트 루프 실행
+    app = QApplication(sys.argv)
+    window = CalculatorApp()
+    window.show()
+    sys.exit(app.exec_())
