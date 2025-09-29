@@ -1,6 +1,12 @@
+# HTTPServer: 서버 자체를 담당하는 클래스
+# 소켓을 열고 클라이언트 연결을 기다린 뒤, 요청이 들어오면 처리하는 역할
+# BaseHTTPRequestHandler: 요청 처리용 핸들러 클래스
+# GET, POST, PUT 등 HTTP 요청이 들어왔을 때 처리하는 메서드(do_GET, do_POST)를 정의 가능
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
+#BaseHTTPRequestHandler 상속받아 SimpleHTTPRequestHandler 정의
+# 클라이언트가 GET 요청을 보내면 자동으로 호출됨
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         # 200 OK 응답
